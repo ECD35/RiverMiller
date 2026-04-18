@@ -1,391 +1,364 @@
 {
-  "generated_at": "2026-04-18T23:14:28.769Z",
+  "generated_at": "2026-04-18T23:17:09.770Z",
   "notion_page_id": "346a5269-fc53-81f4-8fad-d1479df16747",
   "data_model": {
     "Organization": {
       "id": "uuid",
       "name": "text",
-      "created_at": "timestamptz",
-      "updated_at": "timestamptz"
+      "created_at": "timestamp with time zone"
     },
-    "User": {
-      "id": "uuid",
-      "organization_id": "uuid",
-      "email": "text",
-      "display_name": "text",
-      "role_id": "uuid",
-      "created_at": "timestamptz",
-      "updated_at": "timestamptz"
-    },
-    "Role": {
-      "id": "uuid",
-      "organization_id": "uuid",
-      "name": "text",
-      "description": "text",
-      "created_at": "timestamptz",
-      "updated_at": "timestamptz"
-    },
-    "Permission": {
-      "id": "uuid",
-      "name": "text",
-      "description": "text"
-    },
-    "RolePermission": {
-      "role_id": "uuid",
-      "permission_id": "uuid"
+    "Profile": {
+      "id": "uuid (FK to auth.users)",
+      "organization_id": "uuid (FK to Organization)",
+      "full_name": "text",
+      "role": "text (e.g., 'admin', 'viewer')",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone"
     },
     "Supplier": {
       "id": "uuid",
-      "organization_id": "uuid",
+      "organization_id": "uuid (FK to Organization)",
       "name": "text",
       "contact_person": "text",
       "contact_email": "text",
       "phone": "text",
       "address": "text",
       "website": "text",
-      "notes": "text",
-      "risk_assessment": "jsonb",
-      "created_at": "timestamptz",
-      "updated_at": "timestamptz"
+      "payment_details": "jsonb",
+      "risk_assessment": "text",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone"
     },
     "Contract": {
       "id": "uuid",
-      "organization_id": "uuid",
-      "supplier_id": "uuid",
-      "contract_type": "text",
+      "organization_id": "uuid (FK to Organization)",
+      "supplier_id": "uuid (FK to Supplier)",
       "title": "text",
-      "description": "text",
+      "contract_type": "text",
       "start_date": "date",
       "end_date": "date",
-      "renewal_date": "date",
-      "value": "numeric",
+      "value": "decimal",
       "currency": "text",
       "payment_terms": "text",
       "responsible_department": "text",
       "status": "text",
-      "auto_renewal_clause": "boolean",
-      "auto_renewal_period_days": "integer",
-      "termination_notice_days": "integer",
+      "renewal_type": "text",
+      "renewal_notice_period_days": "integer",
+      "auto_renewal_clause_flagged": "boolean",
+      "next_action_date": "date",
+      "key_clauses": "jsonb",
       "metadata": "jsonb",
-      "created_at": "timestamptz",
-      "updated_at": "timestamptz"
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "created_by_user_id": "uuid (FK to auth.users)",
+      "last_updated_by_user_id": "uuid (FK to auth.users)"
     },
     "ContractDocument": {
       "id": "uuid",
-      "contract_id": "uuid",
-      "file_name": "text",
+      "contract_id": "uuid (FK to Contract)",
       "file_url": "text",
+      "file_name": "text",
       "file_type": "text",
       "version": "integer",
-      "uploaded_by_user_id": "uuid",
-      "uploaded_at": "timestamptz",
-      "is_main_document": "boolean"
+      "is_main_document": "boolean",
+      "document_type": "text",
+      "uploaded_at": "timestamp with time zone",
+      "uploaded_by_user_id": "uuid (FK to auth.users)",
+      "extracted_data": "jsonb"
     },
     "Reminder": {
       "id": "uuid",
-      "organization_id": "uuid",
-      "contract_id": "uuid",
-      "user_id": "uuid",
-      "reminder_type": "text",
-      "due_date": "timestamptz",
+      "contract_id": "uuid (FK to Contract)",
+      "reminder_date": "timestamp with time zone",
       "message": "text",
-      "notification_channels": "jsonb",
+      "recipient_user_id": "uuid (FK to auth.users)",
+      "notification_channels": "text[]",
       "is_sent": "boolean",
-      "created_at": "timestamptz",
-      "updated_at": "timestamptz"
+      "sent_at": "timestamp with time zone",
+      "created_at": "timestamp with time zone"
     },
     "Task": {
       "id": "uuid",
-      "organization_id": "uuid",
-      "contract_id": "uuid",
-      "supplier_id": "uuid",
-      "assigned_to_user_id": "uuid",
+      "contract_id": "uuid (FK to Contract, nullable)",
+      "assigned_to_user_id": "uuid (FK to auth.users)",
       "title": "text",
       "description": "text",
-      "due_date": "timestamptz",
+      "due_date": "date",
       "status": "text",
       "priority": "text",
-      "created_at": "timestamptz",
-      "updated_at": "timestamptz"
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "created_by_user_id": "uuid (FK to auth.users)"
     },
-    "CommunicationLog": {
+    "ApprovalWorkflow": {
       "id": "uuid",
-      "organization_id": "uuid",
-      "contract_id": "uuid",
-      "supplier_id": "uuid",
-      "user_id": "uuid",
-      "communication_type": "text",
-      "subject": "text",
-      "body": "text",
-      "sent_at": "timestamptz",
-      "attachments_url": "jsonb"
+      "organization_id": "uuid (FK to Organization)",
+      "name": "text",
+      "description": "text",
+      "workflow_type": "text",
+      "steps": "jsonb",
+      "created_at": "timestamp with time zone"
+    },
+    "ApprovalRequest": {
+      "id": "uuid",
+      "contract_id": "uuid (FK to Contract)",
+      "workflow_id": "uuid (FK to ApprovalWorkflow)",
+      "current_step_index": "integer",
+      "status": "text",
+      "requested_by_user_id": "uuid (FK to auth.users)",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone"
+    },
+    "ApprovalStepInstance": {
+      "id": "uuid",
+      "approval_request_id": "uuid (FK to ApprovalRequest)",
+      "step_order": "integer",
+      "assigned_to_user_id": "uuid (FK to auth.users)",
+      "status": "text",
+      "comments": "text",
+      "completed_at": "timestamp with time zone",
+      "due_date": "date"
     },
     "SupplierPerformance": {
       "id": "uuid",
-      "organization_id": "uuid",
-      "supplier_id": "uuid",
-      "contract_id": "uuid",
+      "supplier_id": "uuid (FK to Supplier)",
+      "contract_id": "uuid (FK to Contract, nullable)",
       "metric_name": "text",
-      "metric_value": "numeric",
-      "target_value": "numeric",
+      "value": "text",
       "date_recorded": "date",
       "notes": "text",
-      "created_at": "timestamptz",
-      "updated_at": "timestamptz"
+      "recorded_by_user_id": "uuid (FK to auth.users)",
+      "created_at": "timestamp with time zone"
+    },
+    "CommunicationLog": {
+      "id": "uuid",
+      "contract_id": "uuid (FK to Contract, nullable)",
+      "supplier_id": "uuid (FK to Supplier, nullable)",
+      "user_id": "uuid (FK to auth.users)",
+      "type": "text",
+      "subject": "text",
+      "body": "text",
+      "communication_date": "timestamp with time zone",
+      "created_at": "timestamp with time zone"
     },
     "AuditLog": {
       "id": "uuid",
-      "organization_id": "uuid",
-      "user_id": "uuid",
+      "user_id": "uuid (FK to auth.users)",
+      "organization_id": "uuid (FK to Organization)",
       "action": "text",
       "entity_type": "text",
       "entity_id": "uuid",
       "old_value": "jsonb",
       "new_value": "jsonb",
       "ip_address": "inet",
-      "timestamp": "timestamptz"
+      "timestamp": "timestamp with time zone"
+    },
+    "Notification": {
+      "id": "uuid",
+      "user_id": "uuid (FK to auth.users)",
+      "message": "text",
+      "link": "text",
+      "is_read": "boolean",
+      "created_at": "timestamp with time zone"
     }
   },
   "api_contracts": [
     {
       "path": "/organizations",
-      "method": "GET",
-      "description": "Get all organizations (admin only)"
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/organizations/{id}",
-      "method": "GET",
-      "description": "Get organization by ID (admin only)"
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
-      "path": "/organizations",
-      "method": "POST",
-      "description": "Create a new organization (admin only)"
+      "path": "/profiles",
+      "methods": [
+        "GET",
+        "PUT"
+      ]
     },
     {
-      "path": "/organizations/{id}",
-      "method": "PUT",
-      "description": "Update organization by ID (admin only)"
-    },
-    {
-      "path": "/users",
-      "method": "GET",
-      "description": "Get all users in the organization"
-    },
-    {
-      "path": "/users/{id}",
-      "method": "GET",
-      "description": "Get user by ID"
-    },
-    {
-      "path": "/users",
-      "method": "POST",
-      "description": "Create a new user"
-    },
-    {
-      "path": "/users/{id}",
-      "method": "PUT",
-      "description": "Update user by ID"
-    },
-    {
-      "path": "/users/{id}",
-      "method": "DELETE",
-      "description": "Delete user by ID"
-    },
-    {
-      "path": "/roles",
-      "method": "GET",
-      "description": "Get all roles in the organization"
-    },
-    {
-      "path": "/roles",
-      "method": "POST",
-      "description": "Create a new role"
-    },
-    {
-      "path": "/roles/{id}",
-      "method": "PUT",
-      "description": "Update role by ID"
-    },
-    {
-      "path": "/roles/{id}",
-      "method": "DELETE",
-      "description": "Delete role by ID"
-    },
-    {
-      "path": "/roles/{id}/permissions",
-      "method": "GET",
-      "description": "Get permissions for a role"
-    },
-    {
-      "path": "/roles/{id}/permissions",
-      "method": "POST",
-      "description": "Add permissions to a role"
-    },
-    {
-      "path": "/roles/{id}/permissions/{permission_id}",
-      "method": "DELETE",
-      "description": "Remove permission from a role"
+      "path": "/profiles/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
       "path": "/suppliers",
-      "method": "GET",
-      "description": "Get all suppliers in the organization"
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/suppliers/{id}",
-      "method": "GET",
-      "description": "Get supplier by ID"
-    },
-    {
-      "path": "/suppliers",
-      "method": "POST",
-      "description": "Create a new supplier"
-    },
-    {
-      "path": "/suppliers/{id}",
-      "method": "PUT",
-      "description": "Update supplier by ID"
-    },
-    {
-      "path": "/suppliers/{id}",
-      "method": "DELETE",
-      "description": "Delete supplier by ID"
-    },
-    {
-      "path": "/suppliers/{id}/performance",
-      "method": "GET",
-      "description": "Get performance metrics for a supplier"
-    },
-    {
-      "path": "/suppliers/{id}/performance",
-      "method": "POST",
-      "description": "Add performance metric for a supplier"
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
       "path": "/contracts",
-      "method": "GET",
-      "description": "Get all contracts in the organization (with filters/search)"
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/contracts/{id}",
-      "method": "GET",
-      "description": "Get contract by ID"
-    },
-    {
-      "path": "/contracts",
-      "method": "POST",
-      "description": "Create a new contract"
-    },
-    {
-      "path": "/contracts/{id}",
-      "method": "PUT",
-      "description": "Update contract by ID"
-    },
-    {
-      "path": "/contracts/{id}",
-      "method": "DELETE",
-      "description": "Delete contract by ID"
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
       "path": "/contracts/{id}/documents",
-      "method": "GET",
-      "description": "Get all documents for a contract"
-    },
-    {
-      "path": "/contracts/{id}/documents",
-      "method": "POST",
-      "description": "Upload a document for a contract"
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
       "path": "/contracts/{id}/documents/{doc_id}",
-      "method": "DELETE",
-      "description": "Delete a contract document"
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
       "path": "/contracts/{id}/reminders",
-      "method": "GET",
-      "description": "Get all reminders for a contract"
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
-      "path": "/contracts/{id}/reminders",
-      "method": "POST",
-      "description": "Create a new reminder for a contract"
+      "path": "/contracts/{id}/reminders/{reminder_id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
       "path": "/contracts/{id}/tasks",
-      "method": "GET",
-      "description": "Get all tasks for a contract"
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
-      "path": "/contracts/{id}/tasks",
-      "method": "POST",
-      "description": "Create a new task for a contract"
+      "path": "/contracts/{id}/tasks/{task_id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
-      "path": "/contracts/{id}/communications",
-      "method": "GET",
-      "description": "Get all communication logs for a contract"
+      "path": "/contracts/{id}/approvals",
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
-      "path": "/contracts/{id}/communications",
-      "method": "POST",
-      "description": "Log new communication for a contract"
-    },
-    {
-      "path": "/contracts/{id}/renew",
-      "method": "POST",
-      "description": "Initiate contract renewal workflow"
-    },
-    {
-      "path": "/contracts/{id}/terminate",
-      "method": "POST",
-      "description": "Initiate contract termination workflow"
-    },
-    {
-      "path": "/reminders",
-      "method": "GET",
-      "description": "Get all reminders for the current user"
-    },
-    {
-      "path": "/reminders/{id}",
-      "method": "PUT",
-      "description": "Update reminder (e.g., mark as read)"
+      "path": "/contracts/{id}/approvals/{approval_id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
       "path": "/tasks",
-      "method": "GET",
-      "description": "Get all tasks for the current user"
+      "methods": [
+        "GET"
+      ]
     },
     {
-      "path": "/tasks/{id}",
-      "method": "PUT",
-      "description": "Update task (e.g., change status)"
+      "path": "/reminders",
+      "methods": [
+        "GET"
+      ]
     },
     {
-      "path": "/audit-logs",
-      "method": "GET",
-      "description": "Get audit logs for the organization"
+      "path": "/approval_workflows",
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
-      "path": "/reports/summary",
-      "method": "GET",
-      "description": "Get overall contract summary report"
+      "path": "/approval_workflows/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
-      "path": "/reports/spend",
-      "method": "GET",
-      "description": "Get spend analysis report"
+      "path": "/supplier_performance",
+      "methods": [
+        "GET",
+        "POST"
+      ]
     },
     {
-      "path": "/reports/risk",
-      "method": "GET",
-      "description": "Get risk analysis report"
+      "path": "/supplier_performance/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     },
     {
-      "path": "/reports/compliance",
-      "method": "GET",
-      "description": "Get compliance report"
+      "path": "/communication_logs",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "path": "/communication_logs/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
+    },
+    {
+      "path": "/audit_logs",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/notifications",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/notifications/{id}",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ]
     }
   ]
 }
